@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ice Aura Universal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#040404;
+  --s1:#070707;
+  --white:#ffffff;
+  --off:#b0b0b0;
+  --dim:#464646;
+  --line:rgba(255,255,255,0.052);
+  --ok:#5aff8a;
+  --warn:#ffd166;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--white);
+  font-family:'DM Mono',monospace;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* CURSOR */
+#cRing{
+  position:fixed;width:26px;height:26px;
+  border:1px solid rgba(255,255,255,0.28);
+  border-radius:50%;pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:width .22s cubic-bezier(.22,1,.36,1),height .22s cubic-bezier(.22,1,.36,1),background .22s,border-color .22s;
+}
+#cDot{
+  position:fixed;width:3px;height:3px;background:#fff;
+  border-radius:50%;pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+}
+.c-big{width:50px!important;height:50px!important;background:rgba(255,255,255,0.035)!important;border-color:rgba(255,255,255,0.5)!important}
+.c-press{width:18px!important;height:18px!important;background:rgba(255,255,255,0.12)!important}
+
+/* GRAIN */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  background-size:200px 200px;pointer-events:none;z-index:800;
+}
+
+/* GRID */
+#gc{position:fixed;inset:0;pointer-events:none;z-index:0;will-change:transform}
+
+/* DRAGON CANVAS */
+#dc{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0;transition:opacity 1.2s ease;}
+
+/* LIGHTNING CANVAS */
+#lc{position:fixed;inset:0;pointer-events:none;z-index:3;}
+
+/* SCANLINE */
+.scan{
+  position:fixed;left:0;right:0;top:-100px;height:80px;
+  background:linear-gradient(to bottom,transparent,rgba(255,255,255,0.007),transparent);
+  pointer-events:none;z-index:1;
+  animation:scanMove 12s linear infinite;
+}
+@keyframes scanMove{from{top:-100px}to{top:110%}}
+
+/* CORNERS */
+.corner{position:fixed;width:14px;height:14px;opacity:0;animation:fi .6s ease 2.5s forwards}
+.tl{top:22px;left:22px;border-top:1px solid rgba(255,255,255,.2);border-left:1px solid rgba(255,255,255,.2)}
+.tr{top:22px;right:22px;border-top:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)}
+.bl{bottom:22px;left:22px;border-bottom:1px solid rgba(255,255,255,.2);border-left:1px solid rgba(255,255,255,.2)}
+.br{bottom:22px;right:22px;border-bottom:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)}
+
+/* TOP BAR */
+.topbar{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:15px 28px;
+  border-bottom:1px solid var(--line);
+  z-index:100;
+  background:rgba(4,4,4,.85);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  opacity:0;animation:sd .6s ease 1.9s forwards;
+}
+.tb-l,.tb-r{font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:var(--dim)}
+.live{display:inline-flex;align-items:center;gap:9px}
+.live-dot{
+  width:5px;height:5px;background:#fff;border-radius:50%;
+  animation:blink 3s ease infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* BOTTOM BAR */
+.bottombar{
+  position:fixed;bottom:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:15px 28px;border-top:1px solid var(--line);
+  z-index:100;opacity:0;animation:su .6s ease 2.2s forwards;
+}
+.bottombar span{font-size:8px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
+
+/* SECTIONS */
+section{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 24px}
+
+/* HERO */
+.eyebrow{
+  font-size:8.5px;letter-spacing:.52em;text-transform:uppercase;color:var(--dim);
+  margin-bottom:38px;
+  opacity:0;animation:ru .85s cubic-bezier(.22,1,.36,1) .4s forwards;
+}
+.logo-wrap{text-align:center;line-height:.85;user-select:none}
+.logo-ice{
+  display:block;font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(80px,13.5vw,176px);letter-spacing:.05em;color:#fff;
+  clip-path:inset(0 100% 0 0);
+  animation:wR .88s cubic-bezier(.76,0,.24,1) .06s forwards;
+}
+.logo-aura{
+  display:block;font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(80px,13.5vw,176px);letter-spacing:.05em;
+  color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.35);
+  clip-path:inset(0 0 0 100%);
+  animation:wL .88s cubic-bezier(.76,0,.24,1) .24s forwards;
+}
+.logo-sub{
+  display:block;margin-top:20px;
+  font-size:clamp(8px,.9vw,11px);letter-spacing:.64em;text-transform:uppercase;color:var(--dim);
+  opacity:0;animation:ru .7s ease .92s forwards;
+}
+@keyframes wR{to{clip-path:inset(0 0% 0 0)}}
+@keyframes wL{to{clip-path:inset(0 0 0 0%)}}
+
+.vline{
+  width:1px;height:0;margin:48px auto;
+  background:linear-gradient(to bottom,rgba(255,255,255,.13),transparent);
+  animation:grow .55s ease 1.12s forwards;
+}
+@keyframes grow{to{height:66px}}
+
+/* DISCORD BTN */
+.disc-btn{
+  display:inline-flex;align-items:center;gap:14px;text-decoration:none;
+  padding:15px 42px;border:1px solid rgba(255,255,255,.16);
+  font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.34em;text-transform:uppercase;
+  color:#fff;position:relative;overflow:hidden;
+  opacity:0;animation:ru .7s ease 1.32s forwards;
+  transition:border-color .3s;
+}
+.disc-btn::before{
+  content:'';position:absolute;inset:0;background:#fff;
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .45s cubic-bezier(.76,0,.24,1);
+}
+.disc-btn:hover::before{transform:scaleX(1)}
+.disc-btn:hover{color:#000;border-color:#fff}
+.disc-btn:hover .di{fill:#000}
+.disc-btn svg,.disc-btn span{position:relative;z-index:1}
+.di{fill:#fff;transition:fill .3s}
+
+/* SCROLL HINT */
+.scroll-hint{
+  position:absolute;bottom:40px;
+  display:flex;flex-direction:column;align-items:center;gap:9px;
+  opacity:0;animation:fi 1s ease 2.3s forwards;
+}
+.scroll-hint p{font-size:7.5px;letter-spacing:.38em;text-transform:uppercase;color:var(--dim)}
+.scroll-arr{
+  width:1px;background:linear-gradient(to bottom,rgba(255,255,255,.22),transparent);
+  animation:sanim 2.4s ease-in-out infinite;
+}
+@keyframes sanim{0%,100%{height:18px;opacity:.35}50%{height:30px;opacity:.9}}
+
+/* EXEC SECTION */
+.exec-section{
+  background:var(--s1);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  min-height:auto;padding:100px 24px 130px;
+}
+
+/* section label */
+.sec-label{
+  display:flex;align-items:center;gap:20px;
+  width:100%;max-width:880px;margin-bottom:50px;
+  opacity:0;transform:translateY(10px);
+  transition:opacity .6s ease,transform .6s ease;
+}
+.sec-label.vis{opacity:1;transform:translateY(0)}
+.sec-label::before,.sec-label::after{content:'';flex:1;height:1px;background:var(--line)}
+.sec-label span{font-size:8px;letter-spacing:.44em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+
+/* stat row */
+.exec-stats{
+  display:flex;gap:38px;align-items:flex-end;
+  width:100%;max-width:880px;margin-bottom:44px;
+  opacity:0;transform:translateY(8px);
+  transition:opacity .55s ease .12s,transform .55s ease .12s;
+}
+.exec-stats.vis{opacity:1;transform:translateY(0)}
+.stat-chip{display:flex;flex-direction:column;gap:5px}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:.03em;color:#fff;line-height:1}
+.stat-lbl{font-size:7.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--dim)}
+
+/* grid */
+.exec-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(192px,1fr));
+  width:100%;max-width:880px;
+  border:1px solid rgba(255,255,255,.065);overflow:hidden;
+  gap:1px;background:rgba(255,255,255,.038);
+}
+
+/* card */
+.exec-card{
+  background:var(--bg);
+  padding:28px 20px 22px;
+  display:flex;flex-direction:column;gap:9px;
+  position:relative;overflow:hidden;
+  opacity:0;transform:translateY(22px);
+  transition:background .2s,transform .25s;
+  cursor:default;
+}
+.exec-card::before{
+  content:'';position:absolute;inset:0;opacity:0;
+  background:radial-gradient(ellipse at 50% -20%,rgba(255,255,255,.045),transparent 68%);
+  transition:opacity .35s;
+}
+.exec-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:transparent;transition:background .3s;
+}
+.exec-card:hover{background:#0f0f0f;transform:translateY(-2px)}
+.exec-card:hover::before{opacity:1}
+.exec-card:hover::after{background:rgba(255,255,255,.15)}
+.exec-card.vis{animation:cardUp .6s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cardUp{to{opacity:1;transform:translateY(0)}}
+
+.exec-name{font-size:13px;font-weight:500;color:#e4e4e4;letter-spacing:.02em}
+.exec-badge{display:inline-flex;align-items:center;gap:7px;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase}
+.bd{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.bd-ok  {background:var(--ok);  box-shadow:0 0 7px var(--ok)}
+.bd-warn{background:var(--warn);box-shadow:0 0 7px var(--warn)}
+.ok  {color:var(--ok)}
+.warn{color:var(--warn)}
+.exec-meta{font-size:8px;color:var(--dim);letter-spacing:.07em}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.tag{
+  font-size:6.5px;letter-spacing:.15em;text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.08);padding:2px 6px;border-radius:2px;color:var(--dim);
+}
+
+/* KEYFRAMES */
+@keyframes ru{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sd{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes su{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+
+/* RESPONSIVE */
+@media(max-width:580px){
+  .exec-grid{grid-template-columns:1fr 1fr}
+  .tb-r{display:none}
+  .exec-stats{gap:22px}
+  .stat-num{font-size:28px}
+}
+</style>
+</head>
+<body>
+
+<div id="cRing"></div>
+<div id="cDot"></div>
+<canvas id="gc"></canvas>
+<canvas id="dc"></canvas>
+<canvas id="lc"></canvas>
+<div class="scan"></div>
+
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<header class="topbar">
+  <div class="tb-l live"><span class="live-dot"></span>Ice Aura Universal</div>
+  <div class="tb-r">v2.0 &nbsp;·&nbsp; Script Hub &nbsp;·&nbsp; Est. 2026</div>
+</header>
+
+<footer class="bottombar">
+  <span>Est. 2026</span>
+  <span>Roblox &nbsp;·&nbsp; All Major Executors</span>
+</footer>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="eyebrow">Roblox Script Hub</div>
+  <div class="logo-wrap">
+    <span class="logo-ice">Ice</span>
+    <span class="logo-aura">Aura</span>
+    <span class="logo-sub">Universal</span>
+  </div>
+  <div class="vline"></div>
+  <a href="https://discord.gg/yourinvite" target="_blank" class="disc-btn">
+    <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+      <path class="di" d="M13.545 1.008A13.27 13.27 0 0 0 10.27 0c-.142.258-.308.605-.422.88a12.252 12.252 0 0 0-3.697 0A9.738 9.738 0 0 0 5.728 0 13.315 13.315 0 0 0 2.45 1.01C.352 4.076-.216 7.063.068 10.008A13.38 13.38 0 0 0 4.145 12c.325-.444.614-.916.864-1.413a8.703 8.703 0 0 1-1.361-.663c.114-.084.226-.172.334-.262a9.545 9.545 0 0 0 8.036 0c.109.09.22.178.334.262-.434.26-.894.483-1.363.664.25.497.538.97.864 1.412a13.34 13.34 0 0 0 4.078-1.99c.334-3.527-.567-6.486-2.386-9.01zM5.34 8.196c-.797 0-1.452-.742-1.452-1.651 0-.91.64-1.652 1.452-1.652.813 0 1.465.742 1.452 1.652 0 .909-.64 1.651-1.452 1.651zm5.319 0c-.797 0-1.452-.742-1.452-1.651 0-.91.64-1.652 1.452-1.652.813 0 1.465.742 1.452 1.652 0 .909-.639 1.651-1.452 1.651z"/>
+    </svg>
+    <span>Join Discord</span>
+  </a>
+  <div class="scroll-hint">
+    <p>Scroll</p>
+    <div class="scroll-arr"></div>
+  </div>
+</section>
+
+<!-- EXECUTORS -->
+<section class="exec-section" id="executors">
+  <div class="sec-label" id="sl"><span>Compatible Executors</span></div>
+  <div class="exec-stats" id="es">
+    <div class="stat-chip"><span class="stat-num" id="cntS">0</span><span class="stat-lbl">Supported</span></div>
+    <div class="stat-chip"><span class="stat-num" id="cntP">0</span><span class="stat-lbl">Partial</span></div>
+    <div class="stat-chip"><span class="stat-num" id="cntT">0</span><span class="stat-lbl">Total</span></div>
+  </div>
+  <div class="exec-grid" id="eg"></div>
+</section>
+
+<script>
+/* ─ CURSOR ─ */
+const ring=document.getElementById('cRing'),dot=document.getElementById('cDot');
+let mx=-300,my=-300,rx=-300,ry=-300;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px'});
+(function loop(){rx+=(mx-rx)*.11;ry+=(my-ry)*.11;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop)})();
+document.addEventListener('mousedown',()=>ring.classList.add('c-press'));
+document.addEventListener('mouseup',()=>ring.classList.remove('c-press'));
+
+/* ─ GRID ─ */
+const cv=document.getElementById('gc'),ctx=cv.getContext('2d');
+function drawGrid(){
+  cv.width=window.innerWidth;cv.height=document.body.scrollHeight;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.lineWidth=1;
+  const s=56;
+  for(let x=0;x<=cv.width;x+=s){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke()}
+  for(let y=0;y<=cv.height;y+=s){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke()}
+}
+drawGrid();
+window.addEventListener('resize',drawGrid);
+window.addEventListener('scroll',()=>{cv.style.transform=`translateY(${scrollY*.07}px)`});
+
+/* ─ EXECUTOR DATA ─ */
+const execs=[
+  // ── PC / Windows
+  {name:'Synapse X',   s:'ok',  m:'Level 7 · Windows',       t:['PC']},
+  {name:'KRNL',        s:'ok',  m:'Free · Windows',           t:['PC','Free']},
+  {name:'Trigon Evo',  s:'ok',  m:'Free · Windows',           t:['PC','Free']},
+  {name:'Solara',      s:'ok',  m:'Free · Windows',           t:['PC','Free']},
+  {name:'Xeno',        s:'ok',  m:'Free · Windows',           t:['PC','Free']},
+  {name:'Electron',    s:'ok',  m:'Free · Windows',           t:['PC','Free']},
+  {name:'Seliware',    s:'ok',  m:'Free · Windows',           t:['PC','Free']},
+  {name:'Nihon',       s:'ok',  m:'Level 7 · Windows',        t:['PC']},
+  {name:'Coco Z',      s:'ok',  m:'Free · Windows',           t:['PC','Free']},
+  {name:'Swift',       s:'ok',  m:'Free · Windows',           t:['PC','Free']},
+  // ── Mobile
+  {name:'Hydrogen',    s:'ok',  m:'iOS / Android',            t:['Mobile']},
+  {name:'Delta',       s:'ok',  m:'iOS / Android',            t:['Mobile','Free']},
+  {name:'Wave',        s:'ok',  m:'iOS',                      t:['Mobile']},
+  {name:'Fluxus',      s:'ok',  m:'Win / Mobile',             t:['PC','Mobile','Free']},
+  {name:'Codex',       s:'ok',  m:'Android',                  t:['Mobile','Free']},
+  {name:'Vega X',      s:'ok',  m:'Android',                  t:['Mobile','Free']},
+  {name:'Zorara',      s:'ok',  m:'Android',                  t:['Mobile','Free']},
+  {name:'Evon',        s:'ok',  m:'Mobile',                   t:['Mobile','Free']},
+  // ── Partial
+  {name:'Arceus X',    s:'warn',m:'Android · Some limits',    t:['Mobile']},
+  {name:'JJSploit',    s:'warn',m:'Free · Windows · Basic',   t:['PC','Free']},
+  {name:'Oxygen U',    s:'warn',m:'Level 6 · Windows',        t:['PC']},
+  {name:'Dansploit',   s:'warn',m:'Android · Outdated',       t:['Mobile']},
+];
+
+const grid=document.getElementById('eg');
+let sup=0,par=0;
+
+execs.forEach((ex,i)=>{
+  if(ex.s==='ok') sup++;
+  else if(ex.s==='warn') par++;
+  const card=document.createElement('div');
+  card.className='exec-card';
+  card.dataset.delay=i*34;
+  const bc=ex.s==='ok'?'ok':'warn';
+  const lbl=ex.s==='ok'?'Supported':'Partial';
+  card.innerHTML=`
+    <div class="exec-name">${ex.name}</div>
+    <div class="exec-badge ${bc}"><span class="bd bd-${ex.s}"></span>${lbl}</div>
+    <div class="exec-meta">${ex.m}</div>
+    <div class="tags">${ex.t.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
+  card.addEventListener('mouseenter',()=>ring.classList.add('c-big'));
+  card.addEventListener('mouseleave',()=>ring.classList.remove('c-big'));
+  grid.appendChild(card);
+});
+
+document.querySelectorAll('a').forEach(el=>{
+  el.addEventListener('mouseenter',()=>ring.classList.add('c-big'));
+  el.addEventListener('mouseleave',()=>ring.classList.remove('c-big'));
+});
+
+/* counter */
+function animCount(el,target,dur){
+  let s=null;
+  (function step(ts){
+    if(!s)s=ts;const p=Math.min((ts-s)/dur,1);
+    el.textContent=Math.round(p*target);if(p<1)requestAnimationFrame(step);
+  })(performance.now());
+}
+
+/* ─ INTERSECTION OBSERVER ─ */
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const el=e.target;
+    if(el.id==='sl'||el.id==='es'){
+      el.classList.add('vis');
+      if(el.id==='es'){
+        setTimeout(()=>{
+          animCount(document.getElementById('cntS'),sup,650);
+          animCount(document.getElementById('cntP'),par,650);
+          animCount(document.getElementById('cntT'),execs.length,650);
+        },120);
+      }
+      io.unobserve(el);return;
+    }
+    if(el.classList.contains('exec-card')){
+      const d=parseInt(el.dataset.delay)||0;
+      setTimeout(()=>el.classList.add('vis'),d);
+      io.unobserve(el);
+    }
+  });
+},{threshold:0.07});
+
+document.querySelectorAll('.exec-card,#sl,#es').forEach(el=>io.observe(el));
+
+/* ═══════════════════════════════════════════
+   DRAGON ANIMATION ENGINE
+   ═══════════════════════════════════════════ */
+const dc = document.getElementById('dc');
+const dctx = dc.getContext('2d');
+
+function resizeDragonCanvas(){
+  dc.width  = window.innerWidth;
+  dc.height = window.innerHeight;
+}
+resizeDragonCanvas();
+window.addEventListener('resize', resizeDragonCanvas);
+
+// Fade in dragon canvas after page intro
+setTimeout(()=>{ dc.style.opacity='1'; }, 2600);
+
+/* ── Dragon class ── */
+class Dragon {
+  constructor(opts={}){
+    this.reset(opts.offscreen !== false);
+    this.speed      = opts.speed  || (0.4 + Math.random()*0.7);
+    this.size       = opts.size   || (18 + Math.random()*22);
+    this.segments   = Math.floor(18 + Math.random()*10);
+    this.wingPhase  = Math.random()*Math.PI*2;
+    this.wingSpeed  = 0.04 + Math.random()*0.03;
+    this.waveAmp    = 28 + Math.random()*22;
+    this.waveFreq   = 0.018 + Math.random()*0.012;
+    this.alpha      = 0.12 + Math.random()*0.18;
+    this.lifetime   = 0;
+    this.maxLife    = 520 + Math.random()*300;
+    this.body       = [];
+    for(let i=0;i<this.segments;i++){
+      this.body.push({x:this.x - i*this.size*0.9, y:this.y});
+    }
+  }
+
+  reset(offscreen=true){
+    // spawn off left or right edge
+    const side = Math.random() < 0.5 ? -1 : 1;
+    this.dir    = side; // -1 = going left, 1 = going right
+    if(side === 1){
+      this.x = -200;
+    } else {
+      this.x = dc.width + 200;
+    }
+    this.y     = 80 + Math.random() * (dc.height * 0.7);
+    this.baseY = this.y;
+    this.t     = Math.random()*200;
+  }
+
+  update(){
+    this.t       += 1;
+    this.lifetime+= 1;
+    this.wingPhase += this.wingSpeed;
+
+    // head moves horizontally + sinusoidal vertical drift
+    const hx = this.x + this.dir * this.speed * 2.2;
+    const hy = this.baseY + Math.sin(this.t * this.waveFreq) * this.waveAmp;
+    this.x = hx;
+
+    // push new head position, pop tail
+    this.body.unshift({x:hx, y:hy});
+    if(this.body.length > this.segments) this.body.pop();
+
+    // fade in / out
+    const fadeFrames = 60;
+    if(this.lifetime < fadeFrames){
+      this.currentAlpha = this.alpha * (this.lifetime/fadeFrames);
+    } else if(this.lifetime > this.maxLife - fadeFrames){
+      this.currentAlpha = this.alpha * ((this.maxLife-this.lifetime)/fadeFrames);
+    } else {
+      this.currentAlpha = this.alpha;
+    }
+
+    return this.lifetime < this.maxLife &&
+      this.x > -300 && this.x < dc.width+300;
+  }
+
+  draw(ctx){
+    if(this.body.length < 3) return;
+    const alpha = Math.max(0, this.currentAlpha || 0);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+
+    // ── BODY ──
+    ctx.beginPath();
+    ctx.moveTo(this.body[0].x, this.body[0].y);
+    for(let i=1;i<this.body.length-1;i++){
+      const mx = (this.body[i].x + this.body[i+1].x)*0.5;
+      const my = (this.body[i].y + this.body[i+1].y)*0.5;
+      ctx.quadraticCurveTo(this.body[i].x, this.body[i].y, mx, my);
+    }
+    // gradient along body
+    const grd = ctx.createLinearGradient(
+      this.body[0].x, this.body[0].y,
+      this.body[this.body.length-1].x, this.body[this.body.length-1].y
+    );
+    grd.addColorStop(0,   'rgba(255,255,255,0.9)');
+    grd.addColorStop(0.4, 'rgba(255,255,255,0.55)');
+    grd.addColorStop(1,   'rgba(255,255,255,0.0)');
+    ctx.strokeStyle = grd;
+    ctx.lineWidth   = this.size * 0.38;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+    ctx.stroke();
+
+    // ── SPINE GLOW ──
+    ctx.beginPath();
+    ctx.moveTo(this.body[0].x, this.body[0].y);
+    for(let i=1;i<this.body.length-1;i++){
+      const mx = (this.body[i].x + this.body[i+1].x)*0.5;
+      const my = (this.body[i].y + this.body[i+1].y)*0.5;
+      ctx.quadraticCurveTo(this.body[i].x, this.body[i].y, mx, my);
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth   = this.size * 0.09;
+    ctx.stroke();
+
+    // ── HEAD ──
+    const hx = this.body[0].x;
+    const hy = this.body[0].y;
+    const s  = this.size;
+
+    // face direction angle
+    let angle = 0;
+    if(this.body.length > 1){
+      angle = Math.atan2(
+        this.body[0].y - this.body[1].y,
+        this.body[0].x - this.body[1].x
+      );
+    }
+
+    ctx.save();
+    ctx.translate(hx, hy);
+    ctx.rotate(angle);
+
+    // snout
+    ctx.beginPath();
+    ctx.ellipse(s*0.55, 0, s*0.55, s*0.28, 0, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fill();
+
+    // eye
+    ctx.beginPath();
+    ctx.arc(s*0.62, -s*0.12, s*0.1, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(0,0,0,0.9)';
+    ctx.fill();
+    // eye glint
+    ctx.beginPath();
+    ctx.arc(s*0.65, -s*0.14, s*0.04, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,1)';
+    ctx.fill();
+
+    // nostril
+    ctx.beginPath();
+    ctx.arc(s*1.0, -s*0.08, s*0.05, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fill();
+
+    // horn
+    ctx.beginPath();
+    ctx.moveTo(s*0.5, -s*0.25);
+    ctx.lineTo(s*0.3, -s*0.7);
+    ctx.lineTo(s*0.65,-s*0.24);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fill();
+
+    // ear-frill
+    ctx.beginPath();
+    ctx.moveTo(s*0.1,  -s*0.28);
+    ctx.lineTo(-s*0.15,-s*0.72);
+    ctx.lineTo(s*0.4,  -s*0.22);
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fill();
+
+    ctx.restore();
+
+    // ── WINGS ──
+    this._drawWings(ctx, alpha);
+
+    ctx.restore();
+  }
+
+  _drawWings(ctx, alpha){
+    if(this.body.length < 4) return;
+    // wing root = ~3rd segment
+    const wi = Math.min(3, this.body.length-1);
+    const wx = this.body[wi].x;
+    const wy = this.body[wi].y;
+
+    const flap  = Math.sin(this.wingPhase) * 0.9; // -1 to 1
+    const spread= this.size * 3.2;
+    const lift  = this.size * (1.8 + flap * 1.4);
+
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.65;
+
+    // top wing
+    ctx.beginPath();
+    ctx.moveTo(wx, wy);
+    ctx.bezierCurveTo(
+      wx - this.dir*spread*0.3, wy - lift*0.6,
+      wx - this.dir*spread*0.7, wy - lift*1.1,
+      wx - this.dir*spread,     wy - lift*0.3
+    );
+    ctx.bezierCurveTo(
+      wx - this.dir*spread*0.65, wy + lift*0.1,
+      wx - this.dir*spread*0.2,  wy - lift*0.15,
+      wx, wy
+    );
+    const wg1 = ctx.createRadialGradient(wx,wy,0, wx,wy, spread);
+    wg1.addColorStop(0,   'rgba(255,255,255,0.55)');
+    wg1.addColorStop(0.6, 'rgba(255,255,255,0.18)');
+    wg1.addColorStop(1,   'rgba(255,255,255,0.0)');
+    ctx.fillStyle = wg1;
+    ctx.fill();
+
+    // bottom wing (smaller, opposite arc)
+    ctx.beginPath();
+    ctx.moveTo(wx, wy);
+    ctx.bezierCurveTo(
+      wx - this.dir*spread*0.2, wy + lift*0.4,
+      wx - this.dir*spread*0.55,wy + lift*0.75,
+      wx - this.dir*spread*0.7, wy + lift*0.2
+    );
+    ctx.bezierCurveTo(
+      wx - this.dir*spread*0.4, wy - lift*0.05,
+      wx - this.dir*spread*0.1, wy + lift*0.1,
+      wx, wy
+    );
+    const wg2 = ctx.createRadialGradient(wx,wy,0, wx,wy, spread*0.7);
+    wg2.addColorStop(0,   'rgba(255,255,255,0.35)');
+    wg2.addColorStop(1,   'rgba(255,255,255,0.0)');
+    ctx.fillStyle = wg2;
+    ctx.fill();
+
+    // wing membrane lines
+    ctx.globalAlpha = alpha * 0.22;
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth   = 0.6;
+    for(let f=0;f<3;f++){
+      const frac = (f+1)/4;
+      ctx.beginPath();
+      ctx.moveTo(wx, wy);
+      ctx.lineTo(
+        wx - this.dir*spread*frac,
+        wy - lift*(0.8-f*0.15)*frac
+      );
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+}
+
+/* ── Particle / breath sparks ── */
+class Spark {
+  constructor(x, y){
+    this.x  = x; this.y = y;
+    this.vx = (Math.random()-0.5)*1.8;
+    this.vy = (Math.random()-0.5)*1.8 - 0.5;
+    this.life = 0;
+    this.maxLife = 30 + Math.random()*30;
+    this.r = 1 + Math.random()*2;
+  }
+  update(){ this.x+=this.vx; this.y+=this.vy; this.vy+=0.04; this.life++; return this.life<this.maxLife; }
+  draw(ctx){
+    const a = (1-this.life/this.maxLife)*0.55;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.r*(1-this.life/this.maxLife*0.5),0,Math.PI*2);
+    ctx.fillStyle=`rgba(255,255,255,${a})`;
+    ctx.fill();
+  }
+}
+
+/* ── Manage dragons ── */
+const dragons=[];
+const sparks=[];
+const MAX_DRAGONS=3;
+
+function spawnDragon(){
+  dragons.push(new Dragon({size:20+Math.random()*18}));
+}
+
+// initial dragons staggered
+setTimeout(()=>spawnDragon(), 2700);
+setTimeout(()=>spawnDragon(), 5200);
+setTimeout(()=>spawnDragon(), 8000);
+
+/* ── Main dragon render loop ── */
+function dragonLoop(){
+  requestAnimationFrame(dragonLoop);
+  dctx.clearRect(0,0,dc.width,dc.height);
+
+  // occasionally spawn breath sparks from lead dragon
+  if(dragons.length>0 && Math.random()<0.08){
+    const d=dragons[0];
+    if(d.body.length>0){
+      sparks.push(new Spark(d.body[0].x+d.dir*d.size, d.body[0].y));
+    }
+  }
+
+  // update & draw sparks
+  for(let i=sparks.length-1;i>=0;i--){
+    if(!sparks[i].update()) sparks.splice(i,1);
+    else sparks[i].draw(dctx);
+  }
+
+  // update & draw dragons
+  for(let i=dragons.length-1;i>=0;i--){
+    if(!dragons[i].update()){
+      dragons.splice(i,1);
+      // spawn a new one after a pause
+      setTimeout(()=>spawnDragon(), 1200+Math.random()*3000);
+    } else {
+      dragons[i].draw(dctx);
+    }
+  }
+
+  // keep pool going
+  if(dragons.length < MAX_DRAGONS && Math.random() < 0.001){
+    spawnDragon();
+  }
+}
+dragonLoop();
+
+/* ═══════════════════════════════════════════
+   LIGHTNING CRACK SYSTEM
+   ═══════════════════════════════════════════ */
+const lc  = document.getElementById('lc');
+const lctx = lc.getContext('2d');
+
+function resizeLightning(){
+  lc.width  = window.innerWidth;
+  lc.height = window.innerHeight;
+}
+resizeLightning();
+window.addEventListener('resize', resizeLightning);
+
+/* ── Build a recursive lightning bolt tree ── */
+function buildBolt(x, y, angle, length, depth, spread){
+  const nodes = [{x, y}];
+  const steps = Math.floor(8 + Math.random()*6);
+  let cx = x, cy = y, ang = angle;
+
+  for(let i = 0; i < steps; i++){
+    ang += (Math.random()-0.5) * spread;
+    const seg = length / steps * (0.7 + Math.random()*0.6);
+    cx += Math.cos(ang) * seg;
+    cy += Math.sin(ang) * seg;
+    nodes.push({x:cx, y:cy});
+
+    // branch
+    if(depth > 0 && Math.random() < 0.38){
+      const branchAngle = ang + (Math.random()-0.5)*1.4;
+      nodes.push(...buildBolt(cx, cy, branchAngle, length*0.45, depth-1, spread*1.1));
+      nodes.push(null); // path break marker
+    }
+  }
+  return nodes;
+}
+
+/* ── Single lightning strike ── */
+class LightningBolt {
+  constructor(){
+    this.reset();
+  }
+
+  reset(){
+    // origin: random edge or top region
+    const r = Math.random();
+    if(r < 0.45){
+      // from top
+      this.ox = lc.width * (0.1 + Math.random()*0.8);
+      this.oy = 0;
+      this.angle = Math.PI*0.4 + Math.random()*Math.PI*0.2;
+    } else if(r < 0.72){
+      // from left
+      this.ox = 0;
+      this.oy = lc.height * (0.05 + Math.random()*0.6);
+      this.angle = -Math.PI*0.15 + Math.random()*Math.PI*0.3;
+    } else {
+      // from right
+      this.ox = lc.width;
+      this.oy = lc.height * (0.05 + Math.random()*0.6);
+      this.angle = Math.PI + Math.PI*0.15 - Math.random()*Math.PI*0.3;
+    }
+
+    this.length  = lc.height * (0.25 + Math.random()*0.45);
+    this.nodes   = buildBolt(this.ox, this.oy, this.angle, this.length, 3, 0.85);
+
+    // lifecycle
+    this.phase   = 'flash';   // flash → hold → fade
+    this.flashT  = 0;
+    this.flashDur= 3 + Math.floor(Math.random()*4);   // frames bright
+    this.holdT   = 0;
+    this.holdDur = 4 + Math.floor(Math.random()*8);
+    this.fadeT   = 0;
+    this.fadeDur = 14 + Math.floor(Math.random()*16);
+    this.alpha   = 0;
+
+    // secondary flicker
+    this.flickers = Math.floor(Math.random()*3);
+    this.flickerAt= [];
+    for(let i=0;i<this.flickers;i++) this.flickerAt.push(this.holdDur*0.3+Math.random()*this.holdDur*0.5);
+
+    // glow color: pure white
+    this.coreColor  = 'rgba(255,255,255,';
+    this.glowColor  = 'rgba(200,220,255,';
+    this.outerGlow  = 'rgba(150,180,255,';
+  }
+
+  update(){
+    if(this.phase === 'flash'){
+      this.alpha = 1.0;
+      this.flashT++;
+      if(this.flashT >= this.flashDur) this.phase = 'hold';
+    } else if(this.phase === 'hold'){
+      // flicker during hold
+      const isFlicker = this.flickerAt.some(f => Math.abs(f - this.holdT) < 2);
+      this.alpha = isFlicker ? 0.15 + Math.random()*0.3 : 0.75 + Math.random()*0.2;
+      this.holdT++;
+      if(this.holdT >= this.holdDur) this.phase = 'fade';
+    } else if(this.phase === 'fade'){
+      this.alpha = 1 - this.fadeT/this.fadeDur;
+      this.alpha = Math.max(0, this.alpha);
+      this.fadeT++;
+      if(this.fadeT >= this.fadeDur) return false;
+    }
+    return true;
+  }
+
+  draw(ctx){
+    if(this.alpha <= 0) return;
+
+    // draw path segments (null = break)
+    const drawSegments = (lineW, colorFn) => {
+      ctx.beginPath();
+      let penDown = false;
+      for(let i = 0; i < this.nodes.length; i++){
+        const n = this.nodes[i];
+        if(n === null){ ctx.stroke(); ctx.beginPath(); penDown=false; continue; }
+        if(!penDown){ ctx.moveTo(n.x, n.y); penDown=true; }
+        else { ctx.lineTo(n.x, n.y); }
+      }
+      ctx.stroke();
+    };
+
+    ctx.save();
+
+    // outer atmospheric glow (widest)
+    ctx.shadowBlur = 0;
+    ctx.lineWidth  = 18;
+    ctx.strokeStyle= this.outerGlow + (this.alpha*0.06) + ')';
+    ctx.lineCap    = 'round';
+    ctx.lineJoin   = 'round';
+    drawSegments();
+
+    // mid glow
+    ctx.lineWidth  = 9;
+    ctx.strokeStyle= this.glowColor + (this.alpha*0.18) + ')';
+    drawSegments();
+
+    // inner bright glow
+    ctx.lineWidth  = 4;
+    ctx.strokeStyle= this.glowColor + (this.alpha*0.5) + ')';
+    drawSegments();
+
+    // core
+    ctx.lineWidth  = 1.4;
+    ctx.strokeStyle= this.coreColor + (this.alpha*0.95) + ')';
+    drawSegments();
+
+    // hot white core center
+    ctx.lineWidth  = 0.6;
+    ctx.strokeStyle= 'rgba(255,255,255,' + (this.alpha) + ')';
+    drawSegments();
+
+    ctx.restore();
+  }
+}
+
+/* ── Flash overlay (screen-wide white flash on strike) ── */
+class FlashOverlay {
+  constructor(){
+    this.alpha = 0.18 + Math.random()*0.14;
+    this.decay = 0.018 + Math.random()*0.012;
+  }
+  update(){ this.alpha -= this.decay; return this.alpha > 0; }
+  draw(ctx){
+    ctx.save();
+    ctx.fillStyle = `rgba(255,255,255,${Math.max(0,this.alpha)})`;
+    ctx.fillRect(0,0,lc.width,lc.height);
+    ctx.restore();
+  }
+}
+
+/* ── Ground crack glow (radial bloom at bolt end) ── */
+class ImpactGlow {
+  constructor(x, y){
+    this.x = x; this.y = y;
+    this.r = 4;
+    this.maxR = 60 + Math.random()*80;
+    this.alpha = 0.7;
+    this.decay = 0.028;
+  }
+  update(){ this.r += (this.maxR - this.r)*0.18; this.alpha -= this.decay; return this.alpha > 0; }
+  draw(ctx){
+    const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);
+    g.addColorStop(0, `rgba(255,255,255,${this.alpha})`);
+    g.addColorStop(0.4, `rgba(200,220,255,${this.alpha*0.4})`);
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+const bolts   = [];
+const flashes = [];
+const impacts = [];
+
+function strikeNow(){
+  const bolt = new LightningBolt();
+  bolts.push(bolt);
+  flashes.push(new FlashOverlay());
+
+  // impact at end of bolt path
+  const last = bolt.nodes.filter(n=>n!==null).pop();
+  if(last) impacts.push(new ImpactGlow(last.x, last.y));
+}
+
+/* initial strikes then random cadence */
+setTimeout(()=>strikeNow(), 1400);
+setTimeout(()=>strikeNow(), 2200);
+setTimeout(()=>{ scheduleStrike(); }, 3200);
+
+function scheduleStrike(){
+  const delay = 2000 + Math.random()*5000;
+  setTimeout(()=>{
+    strikeNow();
+    // sometimes double-strike
+    if(Math.random()<0.3) setTimeout(strikeNow, 80+Math.random()*180);
+    scheduleStrike();
+  }, delay);
+}
+
+function lightningLoop(){
+  requestAnimationFrame(lightningLoop);
+  lctx.clearRect(0,0,lc.width,lc.height);
+
+  for(let i=flashes.length-1;i>=0;i--){
+    if(!flashes[i].update()) flashes.splice(i,1);
+    else flashes[i].draw(lctx);
+  }
+  for(let i=impacts.length-1;i>=0;i--){
+    if(!impacts[i].update()) impacts.splice(i,1);
+    else impacts[i].draw(lctx);
+  }
+  for(let i=bolts.length-1;i>=0;i--){
+    if(!bolts[i].update()) bolts.splice(i,1);
+    else bolts[i].draw(lctx);
+  }
+}
+lightningLoop();
+</script>
+</body>
+</html>
